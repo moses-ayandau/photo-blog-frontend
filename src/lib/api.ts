@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 import { mockApiService } from './mockData';
 
-const API_URL = "https://api.mscv2group1.link"; // Base API URL
+/* const API_URL = "https://api.mscv2group1.link"; */ // Base API URL
 
 // Type definitions
 export interface Photo {
