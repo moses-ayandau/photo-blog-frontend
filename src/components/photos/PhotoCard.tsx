@@ -31,7 +31,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      const response = await photoApi.sharePhoto(photo.url);
+      const response = await photoApi.sharePhoto(photo.imageKey);
       console.log("Share link response:", response);
       
       // Create full shareable URL
