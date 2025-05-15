@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import PhotoCard from './PhotoCard';
 import { photoApi, Photo } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PhotoGridProps {
   mode: 'active' | 'recycled';
@@ -14,12 +15,13 @@ interface PhotoGridProps {
 export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
   const [page, setPage] = useState(1);
   const limit = 20;
+  const { user } = useAuth();
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [mode === 'active' ? 'photos' : 'recycledPhotos', page],
     queryFn: () => mode === 'active' 
-      ? photoApi.getPhotos(page, limit) 
-      : photoApi.getRecycledPhotos(page, limit),
+      ? photoApi.getPhotos(page, limit, user?.id) 
+      : photoApi.getRecycledPhotos(page, limit, user?.id),
   });
 
   const handlePhotoAction = () => {
@@ -29,13 +31,13 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
 
   // Function to load more photos
   const loadMore = () => {
-    if (data && data.items.length >= limit) {
+    if (data && data?.items?.length >= limit) {
       setPage(prev => prev + 1);
     }
   };
 
   // If no photos available, display empty state
-  if (!isLoading && !isError && (!data || data.items.length === 0)) {
+  if (!isLoading && !isError && (!data || data?.length === 0)) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         {mode === 'active' ? (
@@ -85,18 +87,18 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
       ) : (
         <>
           <div className="masonry-grid">
-            {data?.items.map((photo: Photo) => (
+            {Array.isArray(data) ? data.map((photo: Photo) => (
               <PhotoCard 
-                key={photo.id} 
+                key={photo.imageKey} 
                 photo={photo} 
                 onDeleted={handlePhotoAction}
                 onRecovered={handlePhotoAction}
                 onPermanentDelete={handlePhotoAction}
               />
-            ))}
+            )) : null}
           </div>
           
-          {data && data.items.length >= limit && (
+          {data && data?.items?.length >= limit && (
             <div className="flex justify-center mt-8">
               <Button onClick={loadMore} variant="outline">
                 Load More
