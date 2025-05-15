@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { toast } from "sonner";
 import { mockApiService } from './mockData';
 import {CognitoUserPool} from "amazon-cognito-identity-js";
-
-const API_URL = "https://photo.mscv2group2.link"; // Base API URL
+const API_URL = "https://photo.mscv2group2.link";  // Base API URL
 
 // Type definitions
 export interface Photo {
@@ -11,6 +11,8 @@ export interface Photo {
   url: string;
   thumbnail: string; // URL for thumbnail/watermarked version
   title: string;
+  status: string;
+  imageKey: string;
   createdAt: string;
   isRecycled: boolean;
 }
@@ -23,7 +25,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface ShareLinkResponse {
-  url: string;
+  presignedUrl: string;
   expiresAt: string;
 }
 
@@ -36,7 +38,7 @@ const handleApiError = (error: any) => {
 };
 
 // Toggle this to use mock data instead of real API
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 // API request helper with auth headers
 async function apiRequest<T>(
@@ -48,9 +50,9 @@ async function apiRequest<T>(
     // const token = await Auth.currentSession().then(session => session.getIdToken().getJwtToken());
     let token = ""; // Temporary placeholder
       const poolData = {
-          UserPoolId: 'us-east-1_GRg49C8H6',
-          ClientId: 'dhk236icjq8oclf3ll6kemlnr',
-      };
+          UserPoolId: 'us-east-1_58wzLbe8J',
+          ClientId: '24hj44fnp47hqojls94s85vmfm',
+        };
 
       const userPool = new CognitoUserPool(poolData);
       const currentUser = userPool.getCurrentUser();
@@ -75,13 +77,14 @@ async function apiRequest<T>(
       ...options,
       headers,
     });
-    
+
+    const data = await response.json();    
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.message || `API error: ${response.status}`);
     }
     
-    return await response.json();
+    return data;
   } catch (error) {
     return handleApiError(error);
   }
@@ -90,12 +93,12 @@ async function apiRequest<T>(
 // Photo management APIs
 export const photoApi = USE_MOCK_API ? mockApiService : {
   // Get active photos with pagination
-  getPhotos: (page = 1, limit = 20): Promise<PaginatedResponse<Photo>> => 
-    apiRequest(`/images?page=${page}&limit=${limit}`),
-  
-  // Get recycled photos
-  getRecycledPhotos: (page = 1, limit = 20): Promise<PaginatedResponse<Photo>> => 
-    apiRequest(`/recycle/images?page=${page}&limit=${limit}`),
+  getPhotos: (page = 1, limit = 20, userId?: string): Promise<PaginatedResponse<Photo>> =>
+      apiRequest(`/users/${userId}/images/active?page=${page}&limit=${limit}`),
+
+  // Get recycled photos/users/{userId}/images/deleted
+  getRecycledPhotos: (page = 1, limit = 20, userId?: string): Promise<PaginatedResponse<Photo>> => 
+    apiRequest(`/users/${userId}/images/deleted?page=${page}&limit=${limit}`),
   
   // Upload a photo
   uploadPhoto: async (file: File): Promise<Photo> => {
@@ -131,10 +134,10 @@ export const photoApi = USE_MOCK_API ? mockApiService : {
     }),
   
   // Generate share link
-  sharePhoto: (photoId: string): Promise<ShareLinkResponse> => 
-    apiRequest("/share", {
+  sharePhoto: (imageKey: string): Promise<ShareLinkResponse> => 
+    apiRequest("/images/share", {
       method: "POST",
-      body: JSON.stringify({ photoId }),
+      body: JSON.stringify({imageKey}),
     }),
   
   // Get shared photo by token

@@ -51,7 +51,6 @@ export default function AuthForm() {
     if (Object.keys(newErrors).length === 0) {
       try {
         const response = await login(loginData.email, loginData.password);
-        console.log("response" , response);
         navigate('/dashboard');
       } catch (error) {
         // Error is handled in AuthContext via sonner toasts

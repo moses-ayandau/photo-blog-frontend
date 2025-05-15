@@ -54,7 +54,7 @@ export default function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="rounded-full h-8 w-8 p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt={user?.username || ''} />
+                    <AvatarImage src="https://cdn.vectorstock.com/i/500p/18/70/user-profile-icon-avatar-or-person-vector-46431870.jpg" alt={user?.username || ''} />
                     <AvatarFallback>{user?.username ? getInitials(user.username) : 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>

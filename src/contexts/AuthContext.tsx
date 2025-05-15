@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   CognitoUserPool,
@@ -19,7 +20,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<CognitoUserSession>;
   signup: (email: string, password: string, username: string) => Promise<void>;
   confirmSignup: (email: string, code: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -28,8 +29,8 @@ interface AuthContextType {
 }
 
 const poolData = {
-  UserPoolId: 'us-east-1_GRg49C8H6',
-  ClientId: 'dhk236icjq8oclf3ll6kemlnr',
+  UserPoolId: 'us-east-1_58wzLbe8J',
+  ClientId: '24hj44fnp47hqojls94s85vmfm',
 };
 
 const userPool = new CognitoUserPool(poolData);
