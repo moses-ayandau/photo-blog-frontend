@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
@@ -44,14 +44,14 @@ export default function DashboardPage() {
   
   // Check status on mount
   React.useEffect(() => {
-    checkServiceStatus();
+    //fetchData();
   }, []);
   
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
       await queryClient.invalidateQueries({ queryKey: ['photos'] });
-      await checkServiceStatus();
+      //await checkServiceStatus();
     } finally {
       setRefreshing(false);
     }
