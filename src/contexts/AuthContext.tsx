@@ -28,11 +28,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-// const poolData = {
-//   UserPoolId: 'us-east-1_GRg49C8H6',
-//   ClientId: 'dhk236icjq8oclf3ll6kemlnr',
-  
-// };
 const poolData = {
   UserPoolId: 'us-east-1_58wzLbe8J',
   ClientId: '24hj44fnp47hqojls94s85vmfm',

@@ -10,6 +10,7 @@ import PhotoGrid from '@/components/photos/PhotoGrid';
 import UploadModal from '@/components/photos/UploadModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { photoApi } from '@/lib/api';
+import {CognitoUserPool} from "amazon-cognito-identity-js";
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth();
