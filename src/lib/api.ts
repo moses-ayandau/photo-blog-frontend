@@ -1,8 +1,9 @@
 
 import { toast } from "sonner";
 import { mockApiService } from './mockData';
+import {CognitoUserPool} from "amazon-cognito-identity-js";
 
-/* const API_URL = "https://api.mscv2group1.link"; */ // Base API URL
+const API_URL = "https://photo.mscv2group2.link"; // Base API URL
 
 // Type definitions
 export interface Photo {
@@ -45,8 +46,25 @@ async function apiRequest<T>(
   try {
     // Get auth token (would be implemented with AWS Amplify Auth)
     // const token = await Auth.currentSession().then(session => session.getIdToken().getJwtToken());
-    const token = localStorage.getItem("authToken"); // Temporary placeholder
-    
+    let token = ""; // Temporary placeholder
+      const poolData = {
+          UserPoolId: 'us-east-1_GRg49C8H6',
+          ClientId: 'dhk236icjq8oclf3ll6kemlnr',
+      };
+
+      const userPool = new CognitoUserPool(poolData);
+      const currentUser = userPool.getCurrentUser();
+      if (currentUser) {
+          currentUser.getSession((err, session) => {
+              if (err) {
+                  console.error('Session error:', err);
+              } else {
+                  console.log('Session valid:', session.isValid());
+                  console.log('ID token:', session.getIdToken().getJwtToken());
+                  token = session.getIdToken().getJwtToken();
+              }
+          });
+      }
     const headers = {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

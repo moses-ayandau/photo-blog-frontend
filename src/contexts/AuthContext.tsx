@@ -1,9 +1,12 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from "sonner";
-
-// This is a placeholder for AWS Amplify Auth
-// In a real implementation, you'd use Amplify Auth methods
+import {
+  CognitoUserPool,
+  CognitoUser,
+  AuthenticationDetails,
+  CognitoUserAttribute,
+  CognitoUserSession
+} from 'amazon-cognito-identity-js';
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -18,8 +21,19 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, username: string) => Promise<void>;
+  confirmSignup: (email: string, code: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  confirmPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+const poolData = {
+  UserPoolId: 'us-east-1_GRg49C8H6',
+  ClientId: 'dhk236icjq8oclf3ll6kemlnr',
+};
+
+const userPool = new CognitoUserPool(poolData);
+userPool.getCurrentUser();
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -27,82 +41,221 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // In a real implementation, this would use Amplify Auth
-        // const user = await Auth.currentAuthenticatedUser();
-        
-        // Mock implementation for now
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        const currentUser = userPool.getCurrentUser();
+        if (currentUser) {
+          await new Promise((resolve, reject) => {
+            currentUser.getSession((err, session) => {
+              if (err) reject(err);
+              else resolve(session);
+            });
+          });
+          const attributes = await new Promise((resolve, reject) => {
+            currentUser.getUserAttributes((err, attrs) => {
+              if (err) reject(err);
+              else resolve(attrs);
+            });
+          });
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          const userData = attributes.reduce((acc: { [key: string]: string }, attr) => {
+            acc[attr.Name] = attr.Value;
+            return acc;
+          }, {});
+          setUser({
+            id: userData.sub,
+            username: userData.email.split('@')[0],
+            email: userData.email,
+          });
+        } else {
+          setUser(null);
         }
       } catch (error) {
-        // User is not authenticated
         setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
-    
     checkAuth();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+
     try {
-      // In a real implementation, this would use Amplify Auth
-      // const user = await Auth.signIn(email, password);
-      
-      // Mock implementation
-      const user = { id: '1', username: email.split('@')[0], email };
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('authToken', 'mock-jwt-token');
-      
-      setUser(user);
-      toast.success("Welcome back!");
+      const authenticationDetails = new AuthenticationDetails({
+        Username: email,
+        Password: password,
+      });
+
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+
+      // Authenticate user and get session
+      const session = await new Promise<CognitoUserSession>((resolve, reject) => {
+        cognitoUser.authenticateUser(authenticationDetails, {
+          onSuccess: (session) => resolve(session),
+          onFailure: (err) => reject(err),
+        });
+      });
+
+      // ✅ Log tokens
+      console.log("ID Token:", session.getIdToken().getJwtToken());
+      console.log("Access Token:", session.getAccessToken().getJwtToken());
+      console.log("Refresh Token:", session.getRefreshToken().getToken());
+
+      // Get user attributes
+      const attributes = await new Promise<CognitoUserAttribute[]>((resolve, reject) => {
+        cognitoUser.getUserAttributes((err, attrs) => {
+          if (err || !attrs) reject(err);
+          else resolve(attrs);
+        });
+      });
+
+      const userData = attributes.reduce((acc: { [key: string]: string }, attr) => {
+        acc[attr.getName()] = attr.getValue();
+        return acc;
+      }, {});
+
+      setUser({
+        id: userData.sub,
+        username: userData.email.split('@')[0],
+        email: userData.email,
+      });
+
+      toast.success('Welcome back!');
+
+      // Optional: return session if needed
+      return session;
+
     } catch (error: any) {
-      toast.error(error.message || "Failed to log in");
+      if (error.code === 'UserNotConfirmedException') {
+        toast.error('Please confirm your email before logging in.');
+      } else {
+        toast.error(error.message || 'Failed to log in');
+      }
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Signup function
+
   const signup = async (email: string, password: string, username: string) => {
     setIsLoading(true);
     try {
-      // In a real implementation, this would use Amplify Auth
-      // await Auth.signUp({ username: email, password, attributes: { email, name: username } });
-      
-      // Mock implementation
-      toast.success("Account created! Please check your email for verification.");
+      const attributeList = [
+        {
+          Name: 'email',
+          Value: email,
+        },
+        {
+          Name: 'name',
+          Value: username,
+        },
+      ];
+      await new Promise((resolve, reject) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        userPool.signUp(email, password, attributeList, null, (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        });
+      });
+      toast.success('Account created! Please check your email for verification.');
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign up");
+      if (error.code === 'UsernameExistsException') {
+        toast.error('An account with this email already exists.');
+      } else {
+        toast.error(error.message || 'Failed to sign up');
+      }
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Logout function
+  const confirmSignup = async (email: string, code: string) => {
+    setIsLoading(true);
+    try {
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+      await new Promise((resolve, reject) => {
+        cognitoUser.confirmRegistration(code, true, (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        });
+      });
+      toast.success('Email verified! You can now log in.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to verify email');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    try {
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+      await new Promise((resolve, reject) => {
+        cognitoUser.forgotPassword({
+          onSuccess: () => resolve(null),
+          onFailure: (err) => reject(err),
+          inputVerificationCode: () => {}, // Placeholder for code input
+        });
+      });
+      toast.success('Reset code sent! Check your email.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset code');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmPassword = async (email: string, code: string, newPassword: string) => {
+    setIsLoading(true);
+    try {
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+      await new Promise((resolve, reject) => {
+        cognitoUser.confirmPassword(code, newPassword, {
+          onSuccess: () => resolve(null),
+          onFailure: (err) => reject(err),
+        });
+      });
+      toast.success('Password reset successfully! You can now log in.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reset password');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
-      // In a real implementation, this would use Amplify Auth
-      // await Auth.signOut();
-      
-      // Mock implementation
-      localStorage.removeItem('user');
-      localStorage.removeItem('authToken');
-      
+      const currentUser = userPool.getCurrentUser();
+      if (currentUser) {
+        currentUser.signOut();
+      }
       setUser(null);
       toast.success("You've been logged out");
     } catch (error: any) {
-      toast.error(error.message || "Failed to log out");
+      toast.error(error.message || 'Failed to log out');
       throw error;
     }
   };
@@ -114,7 +267,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: !!user,
       login,
       signup,
-      logout
+      confirmSignup,
+      forgotPassword,
+      confirmPassword,
+      logout,
     }}>
       {children}
     </AuthContext.Provider>
