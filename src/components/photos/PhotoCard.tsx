@@ -31,19 +31,17 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      const response = await photoApi.sharePhoto(photo.id);
+      const response = await photoApi.sharePhoto(photo.url);
+      console.log("Share link response:", response);
       
       // Create full shareable URL
-      const shareUrl = `${window.location.origin}/share/${encodeURIComponent(response.url.split('/').pop() || '')}`;
+      const shareUrl = response?.presignedUrl;
       
       // Copy URL to clipboard
       await navigator.clipboard.writeText(shareUrl);
+    
       
-      // Get hours until expiry
-      const expiryDate = new Date(response.expiresAt);
-      const hoursRemaining = Math.round((expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60));
-      
-      toast.success(`Link copied to clipboard! Expires in ${hoursRemaining} hours`);
+      toast.success(`Link copied to clipboard! Expires in 3 hours`);
     } catch (error) {
       toast.error("Failed to generate share link");
     }
@@ -89,10 +87,10 @@ export default function PhotoCard({
   const aspectRatioClass = Math.random() > 0.5 ? "aspect-[3/4]" : Math.random() > 0.5 ? "aspect-square" : "aspect-[4/3]";
 
   return (
-    <div className={`photo-card ${photo.isRecycled ? 'recycled' : ''} animate-fade-in`}>
+    <div className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in`}>
       <div className={aspectRatioClass}>
         <img 
-          src={photo.thumbnail}
+          src={photo.url}
           alt={photo.title || "Photo"} 
           className="object-cover w-full h-full rounded-xl"
         />
@@ -112,7 +110,7 @@ export default function PhotoCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {!photo.isRecycled && (
+              {photo.status === "active" && (
                 <>
                   <DropdownMenuItem onClick={handleShare} className="cursor-pointer">
                     <Share className="mr-2 h-4 w-4" />
@@ -125,7 +123,7 @@ export default function PhotoCard({
                 </>
               )}
               
-              {photo.isRecycled && (
+              {photo.status === "inactive" && (
                 <>
                   <DropdownMenuItem onClick={handleRecover} className="cursor-pointer">
                     <Recycle className="mr-2 h-4 w-4" />
@@ -142,7 +140,7 @@ export default function PhotoCard({
         </div>
         
         <div className="flex mt-2">
-          {!photo.isRecycled && (
+          {photo.status === "active" && (
             <>
               <Button
                 variant="outline"
@@ -166,7 +164,7 @@ export default function PhotoCard({
             </>
           )}
           
-          {photo.isRecycled && (
+          {photo.status === "inactive" && (
             <>
               <Button
                 variant="outline"
