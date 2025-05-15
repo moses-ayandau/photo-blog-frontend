@@ -247,18 +247,6 @@ export default function AuthForm() {
                     {isLoading ? "Logging in..." : "Login"}
                   </Button>
                 </div>
-                <p className="text-center text-sm mt-4">
-                  <button
-                    className="text-primary hover:underline"
-                    onClick={() => {
-                      setForgotEmail(loginData.email);
-                      setShowForgotPassword(true);
-                      setForgotPasswordStep('requestCode');
-                    }}
-                  >
-                    Forgot Password?
-                  </button>
-                </p>
               </form>
             )}
           </TabsContent>
