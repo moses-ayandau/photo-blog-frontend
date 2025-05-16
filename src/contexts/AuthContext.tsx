@@ -28,9 +28,12 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
+const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
+
 const poolData = {
-  UserPoolId: 'us-east-1_yVtgjx198',
-  ClientId: '2mnp2nkvn7lqn3aiefngiklug1',
+  UserPoolId: USER_POOL_ID,
+  ClientId: CLIENT_ID,
 };
 
 const userPool = new CognitoUserPool(poolData);

@@ -16,6 +16,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import RecycleBinPage from "./pages/RecycleBinPage";
 import SharedImagePage from "./pages/SharedImagePage";
 import NotFound from "./pages/NotFound";
+import SharedPhotoView from "./components/photos/SharedPhotoView";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             
             {/* Public Share Route */}
             <Route path="/share/:token" element={<SharedImagePage />} />
+            <Route path="/shared-photo" element={<SharedPhotoView />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
