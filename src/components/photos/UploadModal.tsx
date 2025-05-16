@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, Image, X } from 'lucide-react';
+import { photoApi } from '@/lib/api';
 
-// New API endpoint for uploads
-const API_ENDPOINT = 'https://mdsmku45ph.execute-api.eu-central-1.amazonaws.com/Prod/upload/';
 
 interface UploadModalProps {
   open: boolean;
@@ -19,9 +18,6 @@ interface UploadModalProps {
 export default function UploadModal({ open, onClose, onUploadComplete }: UploadModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
@@ -79,67 +75,11 @@ export default function UploadModal({ open, onClose, onUploadComplete }: UploadM
       return;
     }
     
-    if (!firstName.trim()) {
-      toast.error('First name is required');
-      return;
-    }
-    
-    if (!lastName.trim()) {
-      toast.error('Last name is required');
-      return;
-    }
-    
-    if (!email.trim()) {
-      toast.error('Email is required');
-      return;
-    }
-    
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
     try {
       setIsUploading(true);
       
-      // Read file as ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      
-      // Convert ArrayBuffer to Base64
-      const base64Content = arrayBufferToBase64(arrayBuffer);
-      
-      // Get file extension
-      const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-      
-      // Prepare payload
-      const payload = {
-        firstName,
-        lastName,
-        email,
-        image: base64Content,
-        contentType: file.type,
-        fileExtension
-      };
-      
-      // Send to API
-      const response = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Upload failed: ' + response.statusText);
-      }
-      
-      const data = await response.json();
-      
-      // Get the image URL from the response
-      const imageUrl = data.url || data.fileUrl;
+      // Use the photoApi service with the title parameter
+      const uploadedPhoto = await photoApi.uploadPhoto(file, title);
       
       toast.success('Photo uploaded successfully!');
       onUploadComplete();
@@ -152,23 +92,9 @@ export default function UploadModal({ open, onClose, onUploadComplete }: UploadM
     }
   };
   
-  // Helper function to convert ArrayBuffer to Base64
-  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-  };
-  
   const handleClose = () => {
     setFile(null);
     setTitle('');
-    setFirstName('');
-    setLastName('');
-    setEmail('');
     setIsUploading(false);
     onClose();
   };
@@ -240,47 +166,6 @@ export default function UploadModal({ open, onClose, onUploadComplete }: UploadM
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter a title for your photo"
-                    className="mt-1"
-                  />
-                </div>
-                
-                {/* New fields for first name, last name, and email */}
-                <div>
-                  <Label htmlFor="firstName" className="text-sm text-gray-700">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Enter your first name"
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="lastName" className="text-sm text-gray-700">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Enter your last name"
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="email" className="text-sm text-gray-700">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
                     className="mt-1"
                   />
                 </div>
