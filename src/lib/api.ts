@@ -103,14 +103,10 @@ export const photoApi = USE_MOCK_API ? mockApiService : {
     apiRequest(`/users/${userId}/images/deleted?page=${page}&limit=${limit}`),
   
   // Upload a photo
-  uploadPhoto: async (file: File): Promise<Photo> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    
+  uploadPhoto: async (payload: any): Promise<Photo> => {
     return apiRequest("/upload", {
       method: "POST",
-      body: formData,
-      headers: {}, // Let browser set content type for FormData
+      body: JSON.stringify(payload),
     });
   },
   
