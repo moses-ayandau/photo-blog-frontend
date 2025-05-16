@@ -29,8 +29,8 @@ interface AuthContextType {
 }
 
 const poolData = {
-  UserPoolId: 'us-east-1_58wzLbe8J',
-  ClientId: '24hj44fnp47hqojls94s85vmfm',
+  UserPoolId: 'us-east-1_iLf6SPiHz',
+  ClientId: '5hgg1btag2pudugnlj8v3ldheg',
 };
 
 const userPool = new CognitoUserPool(poolData);
