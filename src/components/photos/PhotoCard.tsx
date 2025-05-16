@@ -50,9 +50,12 @@ export default function PhotoCard({
       const response = await photoApi.sharePhoto(photo.imageKey);
       console.log("Share link response:", response);
       
-      // Create full shareable URL
-      const url = response?.presignedUrl;
-      setShareUrl(url);
+      const presignedUrl = response?.presignedUrl;
+      
+      const baseUrl = window.location.origin;
+      const customShareUrl = `${baseUrl}/shared-photo?url=${encodeURIComponent(presignedUrl)}`;
+      
+      setShareUrl(customShareUrl);
       setIsGeneratingLink(false);
     } catch (error) {
       setIsGeneratingLink(false);
