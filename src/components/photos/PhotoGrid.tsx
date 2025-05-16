@@ -43,7 +43,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
         {mode === 'active' ? (
           <>
             <img 
-              src="/placeholder.svg" 
+              src="https://www.vocaleurope.eu/wp-content/uploads/no-image.jpg" 
               alt="No photos" 
               className="w-24 h-24 mb-4 opacity-50"
             />
@@ -55,7 +55,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
         ) : (
           <>
             <img 
-              src="/placeholder.svg" 
+              src="https://www.vocaleurope.eu/wp-content/uploads/no-image.jpg" 
               alt="Empty recycling bin" 
               className="w-24 h-24 mb-4 opacity-50"
             />
