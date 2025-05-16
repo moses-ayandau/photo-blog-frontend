@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, Image, X } from 'lucide-react';
-import { photoApi } from '@/lib/api';
+import { photoApi, Photo } from '@/lib/api';
 
 
 interface UploadModalProps {
@@ -78,8 +78,45 @@ export default function UploadModal({ open, onClose, onUploadComplete }: UploadM
     try {
       setIsUploading(true);
       
-      // Use the photoApi service with the title parameter
-      const uploadedPhoto = await photoApi.uploadPhoto(file, title);
+      // Process the file
+      const reader = new FileReader();
+      const filePromise = new Promise<import('@/lib/api').Photo>((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const arrayBuffer = reader.result as ArrayBuffer;
+            
+            // Convert ArrayBuffer to Base64
+            let binary = '';
+            const bytes = new Uint8Array(arrayBuffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            const base64Content = window.btoa(binary);
+            
+            // Get file extension
+            const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+            
+            // Prepare payload
+            const payload = {
+              imageTitle: title || file.name.replace(/\.[^/.]+$/, ''),
+              image: base64Content,
+              contentType: file.type,
+              fileExtension
+            };
+            
+            // Call the API
+            const response = await photoApi.uploadPhoto(payload);
+            resolve(response);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+      
+      const uploadedPhoto = await filePromise;
       
       toast.success('Photo uploaded successfully!');
       onUploadComplete();

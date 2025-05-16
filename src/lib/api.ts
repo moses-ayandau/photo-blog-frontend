@@ -101,63 +101,11 @@ export const photoApi = USE_MOCK_API ? mockApiService : {
     apiRequest(`/users/${userId}/images/deleted?page=${page}&limit=${limit}`),
   
   // Upload a photo
-  uploadPhoto: async (file: File, imageTitle?: string): Promise<Photo> => {
-    // If we're using the real API (not mock)
-    if (!USE_MOCK_API) {
-      // For the real API, we'll use the base64 approach as in the UploadModal
-      return new Promise((resolve, reject) => {
-        // Read file as ArrayBuffer
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const arrayBuffer = reader.result as ArrayBuffer;
-            
-            // Convert ArrayBuffer to Base64
-            let binary = '';
-            const bytes = new Uint8Array(arrayBuffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            const base64Content = window.btoa(binary);
-            
-            // Get file extension
-            const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-            
-            // Prepare payload
-            const payload = {
-              imageTitle: imageTitle || file.name.replace(/\.[^/.]+$/, ''),
-              image: base64Content,
-              contentType: file.type,
-              fileExtension
-            };
-            
-            // Use apiRequest to handle authentication and API URL
-            apiRequest<Photo>("/upload", {
-              method: "POST",
-              body: JSON.stringify(payload),
-            }).then(resolve).catch(reject);
-          } catch (error) {
-            reject(error);
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-      });
-    } else {
-      // For mock API, continue using FormData approach
-      const formData = new FormData();
-      formData.append("file", file);
-      if (imageTitle) {
-        formData.append("imageTitle", imageTitle);
-      }
-      
-      return apiRequest("/upload", {
-        method: "POST",
-        body: formData,
-        headers: {},
-      });
-    }
+  uploadPhoto: async (payload: any): Promise<Photo> => {
+    return apiRequest("/upload", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   },
   
   // Move photo to recycle bin
