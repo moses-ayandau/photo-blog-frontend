@@ -68,7 +68,7 @@ export default function PhotoCard({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Link copied to clipboard! Expires in 3 hours");
+      toast.success("Link copied to clipboard! It expires in 3 hours");
       
       // Reset copied state after 2 seconds
       setTimeout(() => {
