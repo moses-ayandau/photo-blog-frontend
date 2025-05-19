@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,15 +31,23 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
     onRefreshNeeded();
   };
 
+  // Function to handle photo click
+  const handlePhotoClick = (photo: Photo) => {
+    console.log("Photo clicked:", photo);
+    if (onPhotoClick) {
+      onPhotoClick(photo);
+    }
+  };
+
   // Function to load more photos
   const loadMore = () => {
-    if (data && data?.items?.length >= limit) {
+    if (data && Array.isArray(data) && data.length >= limit) {
       setPage(prev => prev + 1);
     }
   };
 
   // If no photos available, display empty state
-  if (!isLoading && !isError && (!data || data?.length === 0)) {
+  if (!isLoading && !isError && (!data || (Array.isArray(data) && data.length === 0))) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         {mode === 'active' ? (
@@ -95,12 +104,12 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
                 onDeleted={handlePhotoAction}
                 onRecovered={handlePhotoAction}
                 onPermanentDelete={handlePhotoAction}
-                onClick={() => onPhotoClick && onPhotoClick(photo)}
+                onClick={() => handlePhotoClick(photo)}
               />
             )) : null}
           </div>
           
-          {data && data?.items?.length >= limit && (
+          {data && Array.isArray(data) && data.length >= limit && (
             <div className="flex justify-center mt-8">
               <Button onClick={loadMore} variant="outline">
                 Load More

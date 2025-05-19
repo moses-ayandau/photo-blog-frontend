@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +41,22 @@ export default function PhotoCard({
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [isPermanentDeleting, setIsPermanentDeleting] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only trigger click if not clicking on a button or dropdown
+    if (
+      !(e.target as HTMLElement).closest('button') && 
+      !(e.target as HTMLElement).closest('[role="menu"]') &&
+      onClick
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    }
+  };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,7 +108,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.recyclePhoto(photo.id);
+      await photoApi.recyclePhoto(photo.imageKey, photo.userId);
       toast.success("Photo moved to recycle bin");
       if (onDeleted) onDeleted();
     } catch (error) {
@@ -103,7 +120,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.recoverPhoto(photo.id);
+      await photoApi.recoverPhoto(photo.imageKey, photo.userId);
       toast.success("Photo recovered successfully");
       if (onRecovered) onRecovered();
     } catch (error) {
@@ -115,21 +132,11 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.deletePhotoForever(photo.id);
+      await photoApi.deletePhotoForever(photo.imageKey, photo.userId);
       toast.success("Photo permanently deleted");
       if (onPermanentDelete) onPermanentDelete();
     } catch (error) {
       toast.error("Failed to delete photo permanently");
-    }
-  };
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Only trigger click if not clicking on a button or dropdown
-    if (
-      !(e.target as HTMLElement).closest('button') && 
-      !(e.target as HTMLElement).closest('[role="menu"]')
-    ) {
-      onClick && onClick();
     }
   };
 
@@ -139,7 +146,7 @@ export default function PhotoCard({
   return (
     <>
       <div 
-        className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in`}
+        className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in cursor-pointer`}
         onClick={handleCardClick}
       >
         <div className={aspectRatioClass}>
@@ -170,8 +177,16 @@ export default function PhotoCard({
                       <Share className="mr-2 h-4 w-4" />
                       <span>Share</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDelete} className="cursor-pointer text-red-500 focus:text-red-500">
-                      <Trash2 className="mr-2 h-4 w-4" />
+                    <DropdownMenuItem 
+                      onClick={handleDelete} 
+                      className="cursor-pointer text-red-500 focus:text-red-500"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></span>
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
                       <span>Move to Recycle Bin</span>
                     </DropdownMenuItem>
                   </>
@@ -179,12 +194,28 @@ export default function PhotoCard({
                 
                 {photo.status === "inactive" && (
                   <>
-                    <DropdownMenuItem onClick={handleRecover} className="cursor-pointer">
-                      <Recycle className="mr-2 h-4 w-4" />
+                    <DropdownMenuItem 
+                      onClick={handleRecover} 
+                      className="cursor-pointer"
+                      disabled={isRecovering}
+                    >
+                      {isRecovering ? (
+                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                      ) : (
+                        <Recycle className="mr-2 h-4 w-4" />
+                      )}
                       <span>Recover Photo</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handlePermanentDelete} className="cursor-pointer text-red-500 focus:text-red-500">
-                      <Trash2 className="mr-2 h-4 w-4" />
+                    <DropdownMenuItem 
+                      onClick={handlePermanentDelete} 
+                      className="cursor-pointer text-red-500 focus:text-red-500"
+                      disabled={isPermanentDeleting}
+                    >
+                      {isPermanentDeleting ? (
+                        <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></span>
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
                       <span>Delete Permanently</span>
                     </DropdownMenuItem>
                   </>
@@ -211,8 +242,13 @@ export default function PhotoCard({
                   size="sm"
                   className="bg-white/20 hover:bg-white/40 text-white border-none"
                   onClick={handleDelete}
+                  disabled={isDeleting}
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
+                  {isDeleting ? (
+                    <span className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
                   Recycle
                 </Button>
               </>
@@ -225,8 +261,13 @@ export default function PhotoCard({
                   size="sm"
                   className="mr-2 bg-white/20 hover:bg-white/40 text-white border-none"
                   onClick={handleRecover}
+                  disabled={isRecovering}
                 >
-                  <Recycle className="h-4 w-4 mr-1" />
+                  {isRecovering ? (
+                    <span className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  ) : (
+                    <Recycle className="h-4 w-4 mr-1" />
+                  )}
                   Recover
                 </Button>
                 
@@ -235,8 +276,13 @@ export default function PhotoCard({
                   size="sm"
                   className="bg-white/20 hover:bg-white/40 text-white border-none"
                   onClick={handlePermanentDelete}
+                  disabled={isPermanentDeleting}
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
+                  {isPermanentDeleting ? (
+                    <span className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
                   Delete
                 </Button>
               </>
