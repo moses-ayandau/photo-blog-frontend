@@ -135,7 +135,7 @@ export default function AuthForm() {
                 <button
                     type="button"
                     className="text-primary hover:underline"
-                    onClick={() => navigate('/forgot-password')}
+                    onClick={() => navigate('/reset-password')}
                 >
                   Forgot password?
                 </button>

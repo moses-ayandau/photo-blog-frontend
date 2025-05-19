@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function ForgotPassword() {
+export default function ResetPassword() {
   const navigate = useNavigate();
   const { forgotPassword, confirmPassword, isLoading } = useAuth();
 
@@ -61,7 +61,7 @@ export default function ForgotPassword() {
       try {
         await confirmPassword(email, code, newPassword);
         navigate('/auth'); // Return to login page after successful reset
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error resetting password:', error);
         newErrors.code = error.message || 'Failed to reset password';
         setErrors(newErrors);
@@ -83,7 +83,7 @@ export default function ForgotPassword() {
           {step === 'requestCode' ? (
             <form onSubmit={handleRequestCodeSubmit} className="space-y-4">
               <div className="text-center mb-6">
-                <h2 className="text-xl font-semibold">Forgot Password</h2>
+                <h2 className="text-xl font-semibold">Reset Password</h2>
                 <p className="text-sm text-gray-600 mt-1">
                   Enter your email to receive a reset code
                 </p>
