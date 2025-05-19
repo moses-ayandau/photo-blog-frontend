@@ -86,7 +86,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.recyclePhoto(photo.id);
+      await photoApi.recyclePhoto(photo.imageKey,photo.userId );
       toast.success("Photo moved to recycle bin");
       if (onDeleted) onDeleted();
     } catch (error) {
@@ -98,7 +98,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.recoverPhoto(photo.id);
+      await photoApi.recoverPhoto(photo.imageKey);
       toast.success("Photo recovered successfully");
       if (onRecovered) onRecovered();
     } catch (error) {
@@ -110,7 +110,7 @@ export default function PhotoCard({
     e.stopPropagation();
     
     try {
-      await photoApi.deletePhotoForever(photo.id);
+      await photoApi.deletePhotoForever(photo.imageKey);
       toast.success("Photo permanently deleted");
       if (onPermanentDelete) onPermanentDelete();
     } catch (error) {

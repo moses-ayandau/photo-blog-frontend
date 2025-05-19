@@ -29,8 +29,8 @@ interface AuthContextType {
 }
 
 const poolData = {
-  UserPoolId: 'us-east-1_iLf6SPiHz',
-  ClientId: '5hgg1btag2pudugnlj8v3ldheg',
+  UserPoolId: "us-east-1_Mrdz7CtUr",
+  ClientId: "3mdokkab5ojqn4nuce6pd7n88s",
 };
 
 const userPool = new CognitoUserPool(poolData);
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
-      // ✅ Log tokens
+
       console.log("ID Token:", session.getIdToken().getJwtToken());
       console.log("Access Token:", session.getAccessToken().getJwtToken());
       console.log("Refresh Token:", session.getRefreshToken().getToken());
