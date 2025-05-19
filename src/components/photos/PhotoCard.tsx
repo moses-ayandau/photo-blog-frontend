@@ -26,13 +26,15 @@ interface PhotoCardProps {
   onDeleted?: () => void;
   onRecovered?: () => void;
   onPermanentDelete?: () => void;
+  onClick?: () => void;
 }
 
 export default function PhotoCard({ 
   photo, 
   onDeleted, 
   onRecovered, 
-  onPermanentDelete 
+  onPermanentDelete,
+  onClick
 }: PhotoCardProps) {
   const navigate = useNavigate();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -42,6 +44,19 @@ export default function PhotoCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
   const [isPermanentDeleting, setIsPermanentDeleting] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only trigger click if not clicking on a button or dropdown
+    if (
+      !(e.target as HTMLElement).closest('button') && 
+      !(e.target as HTMLElement).closest('[role="menu"]') &&
+      onClick
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    }
+  };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -130,7 +145,10 @@ export default function PhotoCard({
 
   return (
     <>
-      <div className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in`}>
+      <div 
+        className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in cursor-pointer`}
+        onClick={handleCardClick}
+      >
         <div className={aspectRatioClass}>
           <img 
             src={photo.url}
