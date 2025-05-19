@@ -25,13 +25,15 @@ interface PhotoCardProps {
   onDeleted?: () => void;
   onRecovered?: () => void;
   onPermanentDelete?: () => void;
+  onClick?: () => void;
 }
 
 export default function PhotoCard({ 
   photo, 
   onDeleted, 
   onRecovered, 
-  onPermanentDelete 
+  onPermanentDelete,
+  onClick
 }: PhotoCardProps) {
   const navigate = useNavigate();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -68,7 +70,7 @@ export default function PhotoCard({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Link copied to clipboard! Expires in 3 hours");
+      toast.success("Link copied to clipboard! It expires in 3 hours");
       
       // Reset copied state after 2 seconds
       setTimeout(() => {
@@ -121,12 +123,25 @@ export default function PhotoCard({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only trigger click if not clicking on a button or dropdown
+    if (
+      !(e.target as HTMLElement).closest('button') && 
+      !(e.target as HTMLElement).closest('[role="menu"]')
+    ) {
+      onClick && onClick();
+    }
+  };
+
   // Determine aspect ratio class based on image dimensions (could be dynamic)
   const aspectRatioClass = Math.random() > 0.5 ? "aspect-[3/4]" : Math.random() > 0.5 ? "aspect-square" : "aspect-[4/3]";
 
   return (
     <>
-      <div className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in`}>
+      <div 
+        className={`photo-card ${photo.status === "inactive" ? 'recycled' : ''} animate-fade-in`}
+        onClick={handleCardClick}
+      >
         <div className={aspectRatioClass}>
           <img 
             src={photo.url}
