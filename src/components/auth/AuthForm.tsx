@@ -51,6 +51,7 @@ export default function AuthForm() {
         await login(loginData.email, loginData.password);
         navigate('/dashboard');
       } catch (error) {
+        // Error is handled in AuthContext via sonner toasts
       }
     }
   };
@@ -130,6 +131,15 @@ export default function AuthForm() {
                   </Button>
                 </div>
               </form>
+              <p className="text-center text-sm mt-4">
+                <button
+                    type="button"
+                    className="text-primary hover:underline"
+                    onClick={() => navigate('/forgot-password')}
+                >
+                  Forgot password?
+                </button>
+              </p>
             </TabsContent>
 
             <TabsContent value="signup">

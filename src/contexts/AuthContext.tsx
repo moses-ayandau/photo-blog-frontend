@@ -230,11 +230,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         Pool: userPool,
       });
 
+      console.log('Initiating forgot password for', email);
       await new Promise<void>((resolve, reject) => {
         cognitoUser.forgotPassword({
-          onSuccess: () => resolve(),
-          onFailure: (err) => reject(err),
-          inputVerificationCode: () => {}, // Placeholder for code input
+          onSuccess: () => {
+            console.log('Forgot password success');
+            resolve();
+          },
+          onFailure: (err) => {
+            console.log('Forgot password failure', err);
+            reject(err);
+          },
         });
       });
       toast.success('Reset code sent! Check your email.');

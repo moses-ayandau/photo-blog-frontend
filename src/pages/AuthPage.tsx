@@ -25,11 +25,6 @@ export default function AuthPage() {
       <main className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <AuthForm />
-          <div className="mt-4 text-center">
-            <Link to="/forgot-password" className="text-red-500 hover:underline">
-              Forgot Password?
-            </Link>
-          </div>
         </div>
       </main>
     </div>
