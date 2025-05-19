@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,6 +29,14 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
   const handlePhotoAction = () => {
     refetch();
     onRefreshNeeded();
+  };
+
+  // Function to handle photo click
+  const handlePhotoClick = (photo: Photo) => {
+    console.log("Photo clicked:", photo);
+    if (onPhotoClick) {
+      onPhotoClick(photo);
+    }
   };
 
   // Function to load more photos
@@ -96,7 +104,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
                 onDeleted={handlePhotoAction}
                 onRecovered={handlePhotoAction}
                 onPermanentDelete={handlePhotoAction}
-                onClick={() => onPhotoClick && onPhotoClick(photo)}
+                onClick={() => handlePhotoClick(photo)}
               />
             ))}
           </div>

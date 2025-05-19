@@ -65,6 +65,7 @@ export default function DashboardPage() {
   };
 
   const handlePhotoClick = (photo: Photo) => {
+    console.log("Opening photo in modal:", photo);
     setSelectedPhoto(photo);
     setShareUrl('');
     setCopied(false);
@@ -183,7 +184,12 @@ export default function DashboardPage() {
           />
 
           {/* Photo View Modal */}
-          <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
+          <Dialog 
+            open={!!selectedPhoto} 
+            onOpenChange={(open) => {
+              if (!open) setSelectedPhoto(null);
+            }}
+          >
             <DialogContent className="sm:max-w-5xl p-0 overflow-hidden bg-black/95 border-gray-800 text-white">
               {selectedPhoto && (
                 <div className="flex flex-col h-full">
