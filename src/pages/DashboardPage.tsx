@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw } from 'lucide-react';
+import { Upload, RefreshCw, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/layout/Navigation';
 import PhotoGrid from '@/components/photos/PhotoGrid';
 import UploadModal from '@/components/photos/UploadModal';
 import { useQueryClient } from '@tanstack/react-query';
-import { photoApi } from '@/lib/api';
+import { photoApi, Photo } from '@/lib/api';
 import {CognitoUserPool} from "amazon-cognito-identity-js";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   
   // Redirect to auth page if not authenticated
   React.useEffect(() => {
@@ -56,6 +58,10 @@ export default function DashboardPage() {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const handlePhotoClick = (photo: Photo) => {
+    setSelectedPhoto(photo);
   };
   
   if (isLoading) {
@@ -112,7 +118,11 @@ export default function DashboardPage() {
           )}
           
           {/* Photo Grid */}
-          <PhotoGrid mode="active" onRefreshNeeded={handleRefresh} />
+          <PhotoGrid 
+            mode="active" 
+            onRefreshNeeded={handleRefresh} 
+            onPhotoClick={handlePhotoClick}
+          />
           
           {/* Upload Modal */}
           <UploadModal 
@@ -120,6 +130,39 @@ export default function DashboardPage() {
             onClose={() => setUploadModalOpen(false)} 
             onUploadComplete={handleRefresh}
           />
+
+          {/* Photo View Modal */}
+          <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
+            <DialogContent className="sm:max-w-4xl p-0 overflow-hidden">
+              {selectedPhoto && (
+                <div className="relative">
+                  <div className="absolute top-2 right-2 z-10">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full bg-black/30 hover:bg-black/50 text-white h-8 w-8"
+                      onClick={() => setSelectedPhoto(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-center bg-black/5 p-2">
+                    <img 
+                      src={selectedPhoto.url} 
+                      alt={selectedPhoto.title || "Photo"} 
+                      className="max-h-[80vh] max-w-full object-contain"
+                    />
+                  </div>
+                  <div className="p-4 bg-white">
+                    <h3 className="text-lg font-medium">{selectedPhoto.title || "Untitled Photo"}</h3>
+                    <p className="text-sm text-gray-500">
+                      Uploaded on {new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>
