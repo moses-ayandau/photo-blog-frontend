@@ -41,13 +41,13 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
 
   // Function to load more photos
   const loadMore = () => {
-    if (data && data?.items?.length >= limit) {
+    if (data && Array.isArray(data) && data.length >= limit) {
       setPage(prev => prev + 1);
     }
   };
 
   // If no photos available, display empty state
-  if (!isLoading && !isError && (!data || data?.items?.length === 0)) {
+  if (!isLoading && !isError && (!data || (Array.isArray(data) && data.length === 0))) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         {mode === 'active' ? (
@@ -97,7 +97,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
       ) : (
         <>
           <div className="masonry-grid">
-            {data?.items?.map((photo: Photo) => (
+            {Array.isArray(data) ? data.map((photo: Photo) => (
               <PhotoCard 
                 key={photo.imageKey} 
                 photo={photo} 
@@ -106,10 +106,10 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
                 onPermanentDelete={handlePhotoAction}
                 onClick={() => handlePhotoClick(photo)}
               />
-            ))}
+            )) : null}
           </div>
           
-          {data && data?.items?.length >= limit && (
+          {data && Array.isArray(data) && data.length >= limit && (
             <div className="flex justify-center mt-8">
               <Button onClick={loadMore} variant="outline">
                 Load More
