@@ -37,7 +37,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
   };
 
   // If no photos available, display empty state
-  if (!isLoading && !isError && (!data || data?.length === 0)) {
+  if (!isLoading && !isError && (!data || data?.items?.length === 0)) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         {mode === 'active' ? (

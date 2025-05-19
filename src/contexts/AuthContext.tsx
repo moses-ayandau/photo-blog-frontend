@@ -32,6 +32,7 @@ const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
 const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 
 const poolData = {
+
   UserPoolId: USER_POOL_ID,
   ClientId: CLIENT_ID,
 };
