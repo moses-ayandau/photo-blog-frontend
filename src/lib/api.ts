@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { mockApiService } from './mockData';
 import {CognitoUserPool} from "amazon-cognito-identity-js";
 const API_URL = "https://photo.mscv2group2.link";  // Base API URL
+const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
+const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 
 // Type definitions
 export interface Photo {
@@ -51,8 +53,9 @@ async function apiRequest<T>(
     // const token = await Auth.currentSession().then(session => session.getIdToken().getJwtToken());
     let token = ""; // Temporary placeholder
       const poolData = {
-        UserPoolId: "us-east-1_Mrdz7CtUr",
-        ClientId: "3mdokkab5ojqn4nuce6pd7n88s",
+
+          UserPoolId: USER_POOL_ID,
+          ClientId: CLIENT_ID,
         };
 
       const userPool = new CognitoUserPool(poolData);
@@ -117,18 +120,19 @@ export const photoApi = USE_MOCK_API ? mockApiService : {
     }),
   
   // Restore photo from recycle bin
-  recoverPhoto: (imageKey: string): Promise<void> => 
-    apiRequest(`images/${imageKey}/restore`, {
+  recoverPhoto: (imageKey: string, userId: string): Promise<void> => 
+    apiRequest(`/images/${imageKey}/restore?userId=${userId}`, {
       method: "POST",
       body: JSON.stringify({ imageKey }),
     }),
   
   // Delete photo permanently
-  deletePhotoForever: (imageKey: string): Promise<void> => 
-    apiRequest(`/images/${imageKey}/permanent-delete`, {
+  deletePhotoForever: (imageKey: string, userId: string): Promise<void> => 
+    apiRequest(`/images/${imageKey}/permanent-delete?userId=${userId}`, {
       method: "DELETE",
       body: JSON.stringify({ imageKey }),
     }),
+  
   
   // Generate share link
   sharePhoto: (imageKey: string): Promise<ShareLinkResponse> => 
