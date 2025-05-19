@@ -10,9 +10,10 @@ import { useAuth } from '@/contexts/AuthContext';
 interface PhotoGridProps {
   mode: 'active' | 'recycled';
   onRefreshNeeded: () => void;
+  onPhotoClick?: (photo: Photo) => void;
 }
 
-export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
+export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: PhotoGridProps) {
   const [page, setPage] = useState(1);
   const limit = 20;
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
   };
 
   // If no photos available, display empty state
-  if (!isLoading && !isError && (!data || data?.items?.length === 0)) {
+  if (!isLoading && !isError && (!data || data?.length === 0)) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         {mode === 'active' ? (
@@ -94,6 +95,7 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
                 onDeleted={handlePhotoAction}
                 onRecovered={handlePhotoAction}
                 onPermanentDelete={handlePhotoAction}
+                onClick={() => onPhotoClick && onPhotoClick(photo)}
               />
             )) : null}
           </div>
