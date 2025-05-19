@@ -34,7 +34,7 @@ export default function VerifyEmail() {
       await confirmSignup(email, code);
       // Successfully verified, redirect to auth page
       navigate('/auth');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Verification error:', error);
       setError(error.message || 'Failed to verify email. Please check the code and try again.');
     }

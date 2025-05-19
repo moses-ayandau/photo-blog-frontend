@@ -8,7 +8,6 @@ export default function AuthPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       navigate('/dashboard');

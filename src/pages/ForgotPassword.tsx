@@ -35,7 +35,7 @@ export default function ForgotPassword() {
       try {
         await forgotPassword(email);
         setStep('confirmCode');
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error requesting code:', error);
         newErrors.email = error.message || 'Failed to send reset code';
         setErrors(newErrors);
