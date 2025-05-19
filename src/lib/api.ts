@@ -17,6 +17,7 @@ export interface Photo {
   imageKey: string;
   createdAt: string;
   isRecycled: boolean;
+  userId: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -52,6 +53,7 @@ async function apiRequest<T>(
     // const token = await Auth.currentSession().then(session => session.getIdToken().getJwtToken());
     let token = ""; // Temporary placeholder
       const poolData = {
+
           UserPoolId: USER_POOL_ID,
           ClientId: CLIENT_ID,
         };
@@ -109,27 +111,28 @@ export const photoApi = USE_MOCK_API ? mockApiService : {
       body: JSON.stringify(payload),
     });
   },
-  
+
   // Move photo to recycle bin
-  recyclePhoto: (photoId: string): Promise<void> => 
-    apiRequest("/recycle/delete", {
+  recyclePhoto: (imageKey: string, userId: string): Promise<void> => 
+    apiRequest(`/images/${imageKey}/delete?userId=${userId}`, {
       method: "POST",
-      body: JSON.stringify({ photoId }),
+      body: JSON.stringify({ imageKey }),
     }),
   
   // Restore photo from recycle bin
-  recoverPhoto: (photoId: string): Promise<void> => 
-    apiRequest("/recycle/recover", {
+  recoverPhoto: (imageKey: string, userId: string): Promise<void> => 
+    apiRequest(`/images/${imageKey}/restore?userId=${userId}`, {
       method: "POST",
-      body: JSON.stringify({ photoId }),
+      body: JSON.stringify({ imageKey }),
     }),
   
   // Delete photo permanently
-  deletePhotoForever: (photoId: string): Promise<void> => 
-    apiRequest("/recycle/permanentdelete", {
-      method: "POST",
-      body: JSON.stringify({ photoId }),
+  deletePhotoForever: (imageKey: string, userId: string): Promise<void> => 
+    apiRequest(`/images/${imageKey}/permanent-delete?userId=${userId}`, {
+      method: "DELETE",
+      body: JSON.stringify({ imageKey }),
     }),
+  
   
   // Generate share link
   sharePhoto: (imageKey: string): Promise<ShareLinkResponse> => 
