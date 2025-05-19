@@ -11,9 +11,10 @@ import { useAuth } from '@/contexts/AuthContext';
 interface PhotoGridProps {
   mode: 'active' | 'recycled';
   onRefreshNeeded: () => void;
+  onPhotoClick?: (photo: Photo) => void;
 }
 
-export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
+export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: PhotoGridProps) {
   const [page, setPage] = useState(1);
   const limit = 20;
   const { user } = useAuth();
@@ -88,15 +89,16 @@ export default function PhotoGrid({ mode, onRefreshNeeded }: PhotoGridProps) {
       ) : (
         <>
           <div className="masonry-grid">
-            {Array.isArray(data) ? data.map((photo: Photo) => (
+            {data?.items?.map((photo: Photo) => (
               <PhotoCard 
                 key={photo.imageKey} 
                 photo={photo} 
                 onDeleted={handlePhotoAction}
                 onRecovered={handlePhotoAction}
                 onPermanentDelete={handlePhotoAction}
+                onClick={() => onPhotoClick && onPhotoClick(photo)}
               />
-            )) : null}
+            ))}
           </div>
           
           {data && data?.items?.length >= limit && (
