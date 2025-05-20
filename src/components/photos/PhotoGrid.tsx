@@ -33,7 +33,6 @@ export default function PhotoGrid({ mode, onRefreshNeeded, onPhotoClick }: Photo
 
   // Function to handle photo click
   const handlePhotoClick = (photo: Photo) => {
-    console.log("Photo clicked:", photo);
     if (onPhotoClick) {
       onPhotoClick(photo);
     }

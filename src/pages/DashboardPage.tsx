@@ -147,7 +147,6 @@ export default function DashboardPage() {
                       {selectedPhoto.title || "Untitled Photo"}
                     </h3>
                   </div>
-
                   {/* Image container */}
                   <div className="flex-grow flex items-center justify-center p-6 bg-gray-50">
                     <img

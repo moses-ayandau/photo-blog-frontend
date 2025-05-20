@@ -59,14 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
 
           if (session && session.isValid()) {
-            console.log("Session is valid, refreshing session...");
             await new Promise<void>((resolve, reject) => {
               currentUser.refreshSession(session.getRefreshToken(), (err, newSession) => {
                 if (err) {
                   console.error("Error refreshing session:", err);
                   reject(err);
                 } else {
-                  console.log("Session refreshed successfully");
                   resolve();
                 }
               });
@@ -123,10 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           onFailure: (err) => reject(err),
         });
       });
-
-      console.log("ID Token:", session.getIdToken().getJwtToken());
-      console.log("Access Token:", session.getAccessToken().getJwtToken());
-      console.log("Refresh Token:", session.getRefreshToken().getToken());
 
       const attributes = await new Promise<CognitoUserAttribute[]>((resolve, reject) => {
         cognitoUser.getUserAttributes((err, attrs) => {
@@ -231,11 +225,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         Pool: userPool,
       });
 
-      console.log('Initiating forgot password for', email);
       await new Promise<void>((resolve, reject) => {
         cognitoUser.forgotPassword({
           onSuccess: () => {
-            console.log('Forgot password success');
             resolve();
           },
           onFailure: (err) => {

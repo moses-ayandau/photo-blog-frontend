@@ -125,7 +125,6 @@ export default function SharedPhotoView() {
             try {
                 // Try to fetch the image from the presigned URL
                 const response = await fetch(presignedUrl);
-                console.log("Fetch photo response: ", response);
 
                 if (!response.ok) {
                     // If response is not OK, check if it's expired (403 or 404)
