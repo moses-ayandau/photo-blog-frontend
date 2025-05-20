@@ -66,8 +66,6 @@ export default function PhotoCard({
 
     try {
       const response = await photoApi.sharePhoto(photo.imageKey);
-      console.log("Share link response:", response);
-
       const presignedUrl = response?.presignedUrl;
 
       const baseUrl = window.location.origin;
