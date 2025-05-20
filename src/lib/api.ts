@@ -3,7 +3,7 @@
 import { toast } from "sonner";
 import { mockApiService } from './mockData';
 import {CognitoUserPool} from "amazon-cognito-identity-js";
-const API_URL = "https://photo.mscv2group2.link";  // Base API URL
+const API_URL = "https://photo.mscv2group2.link";
 const USER_POOL_ID = import.meta.env.VITE_USER_POOL_ID;
 const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 
@@ -11,11 +11,11 @@ const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 export interface Photo {
   id: string;
   url: string;
-  thumbnail: string; // URL for thumbnail/watermarked version
+  thumbnail: string;
   title: string;
   status: string;
   imageKey: string;
-  createdAt: string;
+  processedDate: string;
   isRecycled: boolean;
   userId: string;
 }
@@ -65,8 +65,6 @@ async function apiRequest<T>(
               if (err) {
                   console.error('Session error:', err);
               } else {
-                  console.log('Session valid:', session.isValid());
-                  console.log('ID token:', session.getIdToken().getJwtToken());
                   token = session.getIdToken().getJwtToken();
               }
           });
