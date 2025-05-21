@@ -60,18 +60,44 @@ export default function AuthForm() {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
+    // Email validation
     if (!signupData.email) newErrors.email = 'Email is required';
     else if (!validateEmail(signupData.email)) newErrors.email = 'Invalid email format';
 
+    // First name validation
     if (!signupData.firstName) newErrors.firstName = 'First name is required';
     else if (!validateName(signupData.firstName)) newErrors.firstName = 'First name cannot contain spaces';
 
+    // Last name validation
     if (!signupData.lastName) newErrors.lastName = 'Last name is required';
     else if (!validateName(signupData.lastName)) newErrors.lastName = 'Last name cannot contain spaces';
 
-    if (!signupData.password) newErrors.password = 'Password is required';
-    else if (signupData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+    // Password validation
+    if (!signupData.password) {
+      newErrors.password = 'Password is required';
+    } else {
+      const missing: string[] = [];
+      if (signupData.password.length < 8) {
+        missing.push('at least 8 characters');
+      }
+      if (!/[A-Z]/.test(signupData.password)) {
+        missing.push('an uppercase letter');
+      }
+      if (!/[a-z]/.test(signupData.password)) {
+        missing.push('a lowercase letter');
+      }
+      if (!/[0-9]/.test(signupData.password)) {
+        missing.push('a number');
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(signupData.password)) {
+        missing.push('a symbol');
+      }
+      if (missing.length > 0) {
+        newErrors.password = `Password must include: ${missing.join(', ')}`;
+      }
+    }
 
+    // Confirm password validation
     if (signupData.password !== signupData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
