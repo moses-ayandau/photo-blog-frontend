@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+
 export default function Navigation() {
   const { user, logout, isAuthenticated } = useAuth();
   const location = useLocation();
@@ -30,7 +31,7 @@ export default function Navigation() {
     <header className="bg-white border-b border-gray-200">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Link to="/" className="text-xl font-bold text-primary">PixPath</Link>
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-primary"><img src="/logo.png" alt="PixPath" className="w-15 h-10" />PixPath</Link>
         </div>
         
         {isAuthenticated ? (

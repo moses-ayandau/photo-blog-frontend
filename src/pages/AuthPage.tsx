@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthForm from '@/components/auth/AuthForm';
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/layout/Navigation';
+import AuthLoader from '@/components/auth/AuthLoader';
 
 export default function AuthPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,7 +16,7 @@ export default function AuthPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className='flex items-center justify-center h-screen'><AuthLoader /></div>;
   }
 
   return (
