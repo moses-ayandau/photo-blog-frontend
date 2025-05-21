@@ -53,7 +53,9 @@ export default function DashboardPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await queryClient.invalidateQueries({ queryKey: ['photos'] });
+      setTimeout(async () => {
+        await queryClient.invalidateQueries({ queryKey: ['photos'] });
+      },4000)
       //await checkServiceStatus();
     } finally {
       setRefreshing(false);
